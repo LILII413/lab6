@@ -1,176 +1,65 @@
 #include <iostream>
-#include <fstream>
-#include <vector>
-#include <string>
-#include <cstdio>  // Para usar remove() y rename()
 using namespace std;
 
-class MiembroClub {
-private:
-    string nombre;
-    int edad;
-    string correo;
+const int TAM = 15;
 
-public:
-    MiembroClub(string n, int e, string c) : nombre(n), edad(e), correo(c) {}
+// Función para ingresar números
+void ingresarNumeros(int arreglo[], int tam) {
+    for (int i = 0; i < tam; i++) {
+        cout << "Ingrese el número " << i + 1 << ": ";
+        cin >> arreglo[i];
+    }
+}
 
-    void guardarEnArchivo() {
-        ofstream archivo("club.txt", ios::app);  // Asegura que los datos se agreguen al final
-        if (archivo.is_open()) {
-            archivo << nombre << " " << edad << " " << correo << endl;
-            archivo.close();
-            cout << "Datos guardados exitosamente.\n";
-        }
-        else {
-            cout << "Error al abrir el archivo.\n";
+// Función para calcular el promedio
+double calcularPromedio(int arreglo[], int tam) {
+    int suma = 0;
+    for (int i = 0; i < tam; i++) {
+        suma += arreglo[i];
+    }
+    return static_cast<double>(suma) / tam;
+}
+
+// Función para obtener números mayores al promedio
+int obtenerMayoresAlPromedio(int original[], int tam, double promedio, int mayores[]) {
+    int contador = 0;
+    for (int i = 0; i < tam; i++) {
+        if (original[i] > promedio) {
+            mayores[contador] = original[i];
+            contador++;
         }
     }
+    return contador; // Retorna cuántos valores se guardaron
+}
 
-    static void leerDesdeArchivo() {
-        ifstream archivo("club.txt");
-        string n, c;
-        int e;
-        if (archivo.is_open()) {
-            cout << "\nLista de Miembros:\n";
-            while (archivo >> n >> e >> c) {
-                cout << "Nombre: " << n << ", Edad: " << e << ", Correo: " << c << endl;
-            }
-            archivo.close();
-        }
-        else {
-            cout << "Error al abrir el archivo o el archivo no existe.\n";
-        }
+// Función para imprimir un arreglo
+void imprimirArreglo(int arreglo[], int tam, string titulo) {
+    cout << titulo << endl;
+    for (int i = 0; i < tam; i++) {
+        cout << arreglo[i] << " ";
     }
-
-    static void actualizarMiembro(string nombreBuscar, int nuevaEdad, string nuevoCorreo) {
-        ifstream archivo("club.txt");
-        ofstream archivoTemp("temp.txt");
-        string n, c;
-        int e;
-        bool encontrado = false;
-
-        if (archivo.is_open() && archivoTemp.is_open()) {
-            while (archivo >> n >> e >> c) {
-                if (n == nombreBuscar) {
-                    archivoTemp << n << " " << nuevaEdad << " " << nuevoCorreo << endl;
-                    encontrado = true;
-                }
-                else {
-                    archivoTemp << n << " " << e << " " << c << endl;
-                }
-            }
-            archivo.close();
-            archivoTemp.close();
-
-            if (remove("club.txt") != 0) {  // Elimina el archivo original
-                cout << "Error al eliminar el archivo original.\n";
-            }
-            else {
-                if (rename("temp.txt", "club.txt") != 0) {  // Renombra el archivo temporal
-                    cout << "Error al renombrar el archivo temporal.\n";
-                }
-                else {
-                    cout << (encontrado ? "Miembro actualizado exitosamente.\n" : "Miembro no encontrado.\n");
-                }
-            }
-        }
-        else {
-            cout << "Error al abrir el archivo.\n";
-        }
-    }
-
-    static void eliminarMiembro(string nombreBuscar) {
-        ifstream archivo("club.txt");
-        ofstream archivoTemp("temp.txt");
-        string n, c;
-        int e;
-        bool eliminado = false;
-
-        if (archivo.is_open() && archivoTemp.is_open()) {
-            while (archivo >> n >> e >> c) {
-                if (n == nombreBuscar) {
-                    eliminado = true;  // No lo escribimos en el archivo temporal
-                }
-                else {
-                    archivoTemp << n << " " << e << " " << c << endl;
-                }
-            }
-            archivo.close();
-            archivoTemp.close();
-
-            if (remove("club.txt") != 0) {  // Elimina el archivo original
-                cout << "Error al eliminar el archivo original.\n";
-            }
-            else {
-                if (rename("temp.txt", "club.txt") != 0) {  // Renombra el archivo temporal
-                    cout << "Error al renombrar el archivo temporal.\n";
-                }
-                else {
-                    cout << (eliminado ? "Miembro eliminado exitosamente.\n" : "Miembro no encontrado.\n");
-                }
-            }
-        }
-        else {
-            cout << "Error al abrir el archivo.\n";
-        }
-    }
-};
+    cout << "\n" << endl;
+}
 
 int main() {
-    int opcion;
-    do {
-        cout << "\n--- Menu del Club ---\n";
-        cout << "1. Agregar nuevo miembro\n";
-        cout << "2. Mostrar miembros\n";
-        cout << "3. Actualizar miembro\n";
-        cout << "4. Eliminar miembro\n";
-        cout << "5. Salir\n";
-        cout << "Seleccione una opcion: ";
-        cin >> opcion;
+    int numeros[TAM];
+    int mayores[TAM]; // Este tendrá a lo mucho los mismos 15 elementos
+    double promedio;
+    int cantidadMayores;
 
-        if (opcion == 1) {
-            string nombre, correo;
-            int edad;
-            cout << "Ingrese nombre: ";
-            cin >> nombre;
-            cout << "Ingrese edad: ";
-            cin >> edad;
-            cout << "Ingrese correo: ";
-            cin >> correo;
+    // Paso 1: Ingreso
+    ingresarNumeros(numeros, TAM);
 
-            MiembroClub nuevo(nombre, edad, correo);
-            nuevo.guardarEnArchivo();
-        }
-        else if (opcion == 2) {
-            MiembroClub::leerDesdeArchivo();
-        }
-        else if (opcion == 3) {
-            string nombre;
-            int edad;
-            string correo;
-            cout << "Ingrese nombre del miembro a actualizar: ";
-            cin >> nombre;
-            cout << "Ingrese nueva edad: ";
-            cin >> edad;
-            cout << "Ingrese nuevo correo: ";
-            cin >> correo;
+    // Paso 2: Promedio
+    promedio = calcularPromedio(numeros, TAM);
 
-            MiembroClub::actualizarMiembro(nombre, edad, correo);
-        }
-        else if (opcion == 4) {
-            string nombre;
-            cout << "Ingrese nombre del miembro a eliminar: ";
-            cin >> nombre;
+    // Paso 3: Filtrar mayores
+    cantidadMayores = obtenerMayoresAlPromedio(numeros, TAM, promedio, mayores);
 
-            MiembroClub::eliminarMiembro(nombre);
-        }
-        else if (opcion == 5) {
-            cout << "Saliendo...\n";
-        }
-        else {
-            cout << "Opcion invalida. Intente de nuevo.\n";
-        }
-    } while (opcion != 5);
+    // Paso 4: Imprimir resultados
+    imprimirArreglo(numeros, TAM, "Todos los números:");
+    cout << "Promedio: " << promedio << "\n" << endl;
+    imprimirArreglo(mayores, cantidadMayores, "Números mayores al promedio:");
 
     return 0;
 }
